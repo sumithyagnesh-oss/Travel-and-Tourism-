@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Incredible India Travel - Advanced GPS-Enabled Travel Platform</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+     <video class="video-bg" autoplay muted loop>
+    <source src="black.mp4.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+    <!-- Enhanced GPS Status Bar -->
+    <div class="gps-status-bar" id="gps-status-bar">
+        <div class="container">
+            <div class="gps-status-content">
+                <div class="gps-signal" id="gps-signal">
+                    <span class="gps-icon">📍</span>
+                    <span class="gps-text">GPS Ready</span>
+                    <span class="gps-accuracy" id="gps-accuracy"></span>
+                </div>
+                <div class="coordinate-display" id="coordinate-display">
+                    <select id="coordinate-format" class="coordinate-selector">
+                        <option value="decimal">Decimal</option>
+                        <option value="dms">DMS</option>
+                        <option value="utm">UTM</option>
+                    </select>
+                    <span class="coordinates-text" id="coordinates-text">---.----, ---.----</span>
+                </div>
+                <div class="gps-controls">
+                    <button class="gps-refresh-btn" id="gps-refresh-btn" onclick="refreshLocation()">🔄</button>
+                    <button class="auto-refresh-btn" id="auto-refresh-btn" onclick="toggleAutoRefresh()">⏱️</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h2>🇮🇳 Incredible India Travel</h2>
+                <span class="nav-subtitle">GPS-Powered Travel Platform</span>
+            </div>
+            <div class="nav-links">
+                <a href="#hotels">Hotels</a>
+                <a href="#restaurants">Restaurants</a>
+                <a href="#trip-calculator">Trip Planner</a>
+                <a href="#my-bookings" onclick="showBookings()">My Bookings</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section with Enhanced GPS -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Discover India with Precision GPS</h1>
+                <p>Experience India's beauty with enterprise-level GPS accuracy, real-time location tracking, and comprehensive mapping features designed for the modern traveler</p>
+                
+                <!-- Enhanced GPS Location Panel -->
+                <div class="gps-location-panel" id="gps-location-panel">
+                    <div class="location-card">
+                        <div class="location-header">
+                            <h3>📍 Your GPS Location</h3>
+                            <button class="enable-gps-btn btn btn--primary" id="enable-gps-btn" onclick="requestHighAccuracyLocation()">
+                                Enable High-Accuracy GPS
+                            </button>
+                        </div>
+                        <div class="location-details hidden" id="location-details">
+                            <div class="location-grid">
+                                <div class="location-item">
+                                    <label>Coordinates:</label>
+                                    <span id="current-coordinates">---.----, ---.----</span>
+                                </div>
+                                <div class="location-item">
+                                    <label>Accuracy:</label>
+                                    <span id="current-accuracy">-- meters</span>
+                                </div>
+                                <div class="location-item">
+                                    <label>Elevation:</label>
+                                    <span id="current-elevation">-- meters</span>
+                                </div>
+                                <div class="location-item">
+                                    <label>Heading:</label>
+                                    <span id="current-heading">-- degrees</span>
+                                </div>
+                                <div class="location-item">
+                                    <label>Speed:</label>
+                                    <span id="current-speed">-- km/h</span>
+                                </div>
+                                <div class="location-item">
+                                    <label>Last Update:</label>
+                                    <span id="last-update">--</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="hero-buttons">
+                    <a href="#hotels" class="btn btn--primary btn--lg">🏨 Find Hotels Near Me</a>
+                    <a href="#trip-calculator" class="btn btn--outline btn--lg">🗺️ GPS Trip Planner</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Hotels Section with Enhanced GPS -->
+    <section id="hotels" class="section">
+        <div class="container">
+            <h2 class="section-title">🏨 GPS-Located Hotels Across India</h2>
+            
+            <!-- Enhanced GPS Controls -->
+            <div class="gps-controls-panel">
+                <div class="location-services">
+                    <button class="btn btn--secondary" onclick="requestHighAccuracyLocation()">📍 Enable Precise Location</button>
+                    <div class="proximity-controls">
+                        <label>Search Radius:</label>
+                        <select id="search-radius" class="form-control">
+                            <option value="">All Locations</option>
+                            <option value="1">Within 1km</option>
+                            <option value="5">Within 5km</option>
+                            <option value="10">Within 10km</option>
+                            <option value="25">Within 25km</option>
+                            <option value="50">Within 50km</option>
+                        </select>
+                    </div>
+                    <button class="btn btn--primary" onclick="sortByProximity('hotels')">📏 Sort by Distance</button>
+                </div>
+            </div>
+
+            <!-- View Toggle -->
+            <div class="view-toggle">
+                <button class="toggle-btn active" data-view="list" onclick="toggleView('hotels', 'list')">📋 List View</button>
+                <button class="toggle-btn" data-view="map" onclick="toggleView('hotels', 'map')">🗺️ GPS Map View</button>
+                <button class="toggle-btn" data-view="cluster" onclick="toggleView('hotels', 'cluster')">🎯 Cluster View</button>
+            </div>
+
+            <!-- Advanced Filters -->
+            <div class="filters-container">
+                <div class="search-box">
+                    <input type="text" id="hotel-search" class="form-control" placeholder="Search hotels, cities, or coordinates...">
+                </div>
+                <div class="filter-controls">
+                    <select id="city-filter" class="form-control">
+                        <option value="">All Cities</option>
+                    </select>
+                    <select id="price-filter" class="form-control">
+                        <option value="">All Price Ranges</option>
+                        <option value="budget">Budget (₹600-₹2500)</option>
+                        <option value="midrange">Mid-range (₹3500-₹9000)</option>
+                        <option value="luxury">Luxury (₹12000+)</option>
+                    </select>
+                    <select id="rating-filter" class="form-control">
+                        <option value="">All Ratings</option>
+                        <option value="3">3+ Stars</option>
+                        <option value="4">4+ Stars</option>
+                        <option value="5">5 Stars</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Enhanced Map Container -->
+            <div class="map-container hidden" id="hotels-map-container">
+                <div class="map-controls">
+                    <button class="map-control-btn" onclick="centerOnUser()">📍 Center on Me</button>
+                    <button class="map-control-btn" onclick="toggleSatelliteView()">🛰️ Satellite</button>
+                    <button class="map-control-btn" onclick="showTraffic()">🚦 Traffic</button>
+                </div>
+                <div class="map" id="hotels-map" style="position: relative; height: 500px;"></div>
+                <div class="map-legend">
+                    <span class="legend-item"><span class="user-marker"></span> Your Location</span>
+                    <span class="legend-item"><span class="hotel-marker"></span> Hotels</span>
+                    <span class="legend-item"><span class="selected-marker"></span> Selected</span>
+                </div>
+            </div>
+
+            <!-- Hotels Grid -->
+            <div id="hotels-grid" class="hotels-grid">
+                <!-- Hotels will be populated by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Restaurants Section with Enhanced GPS -->
+    <section id="restaurants" class="section">
+        <div class="container">
+            <h2 class="section-title">🍽️ GPS-Located Restaurants</h2>
+            
+            <!-- Enhanced GPS Controls -->
+            <div class="gps-controls-panel">
+                <div class="location-services">
+                    <button class="btn btn--secondary" onclick="requestHighAccuracyLocation()">📍 Find Restaurants Near Me</button>
+                    <div class="proximity-controls">
+                        <label>Search Radius:</label>
+                        <select id="restaurant-search-radius" class="form-control">
+                            <option value="">All Locations</option>
+                            <option value="1">Within 1km</option>
+                            <option value="5">Within 5km</option>
+                            <option value="10">Within 10km</option>
+                            <option value="25">Within 25km</option>
+                        </select>
+                    </div>
+                    <button class="btn btn--primary" onclick="sortByProximity('restaurants')">📏 Sort by Distance</button>
+                </div>
+            </div>
+
+            <!-- View Toggle -->
+            <div class="view-toggle">
+                <button class="toggle-btn active" data-view="list" onclick="toggleView('restaurants', 'list')">📋 List View</button>
+                <button class="toggle-btn" data-view="map" onclick="toggleView('restaurants', 'map')">🗺️ GPS Map View</button>
+            </div>
+            
+            <!-- Restaurant Filters -->
+            <div class="filters-container">
+                <div class="search-box">
+                    <input type="text" id="restaurant-search" class="form-control" placeholder="Search restaurants, cuisine, or location...">
+                </div>
+                <div class="filter-controls">
+                    <select id="cuisine-filter" class="form-control">
+                        <option value="">All Cuisines</option>
+                        <option value="vegetarian_chains">Vegetarian Chains</option>
+                        <option value="non_vegetarian">Non-Vegetarian</option>
+                        <option value="fine_dining">Fine Dining</option>
+                    </select>
+                    <select id="cost-filter" class="form-control">
+                        <option value="">All Price Ranges</option>
+                        <option value="budget">Budget (₹200-₹600)</option>
+                        <option value="moderate">Moderate (₹600-₹1500)</option>
+                        <option value="expensive">Expensive (₹1500+)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Restaurant Categories -->
+            <div class="restaurant-categories">
+                <div class="category-tabs">
+                    <button class="tab-btn active" data-category="all">All Restaurants</button>
+                    <button class="tab-btn" data-category="vegetarian_chains">🥗 Vegetarian</button>
+                    <button class="tab-btn" data-category="non_vegetarian">🍖 Non-Vegetarian</button>
+                    <button class="tab-btn" data-category="fine_dining">🍷 Fine Dining</button>
+                </div>
+            </div>
+
+            <!-- Restaurants Map -->
+            <div class="map-container hidden" id="restaurants-map-container">
+                <div class="map-controls">
+                    <button class="map-control-btn" onclick="centerOnUser()">📍 Center on Me</button>
+                    <button class="map-control-btn" onclick="showNearbyPOIs()">🏛️ Nearby Attractions</button>
+                </div>
+                <div class="map" id="restaurants-map" style="position: relative; height: 500px;"></div>
+            </div>
+
+            <!-- Restaurants Grid -->
+            <div id="restaurants-grid" class="restaurants-grid">
+                <!-- Restaurants will be populated by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Enhanced Trip Calculator with GPS Route Planning -->
+    <section id="trip-calculator" class="section">
+        <div class="container">
+            <h2 class="section-title">🗺️ GPS-Powered Trip Planner</h2>
+            
+            <div class="calculator-container">
+                <div class="calculator-form">
+                    <h3>Plan Your Route</h3>
+                    
+                    <div class="route-builder">
+                        <div class="form-group">
+                            <label class="form-label">Starting Point</label>
+                            <div class="location-input">
+                                <select id="trip-from-city" class="form-control">
+                                    <option value="">Select Starting City</option>
+                                </select>
+                                <button class="btn btn--outline" onclick="useCurrentLocationAsStart()">📍 Use Current Location</button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Destination</label>
+                            <div class="location-input">
+                                <select id="trip-to-city" class="form-control">
+                                    <option value="">Select Destination City</option>
+                                </select>
+                                <button class="btn btn--outline" onclick="addWaypoint()">+ Add Stop</button>
+                            </div>
+                        </div>
+
+                        <div id="waypoints-container" class="waypoints-container">
+                            <!-- Waypoints will be added here -->
+                        </div>
+                    </div>
+                    
+                    <div class="trip-details">
+                        <div class="form-group">
+                            <label class="form-label">Trip Duration</label>
+                            <input type="number" id="trip-days" class="form-control" value="5" min="1" max="30">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Number of Travelers</label>
+                            <input type="number" id="trip-people" class="form-control" value="2" min="1" max="10">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Travel Style</label>
+                            <div class="travel-style-options">
+                                <label class="style-option">
+                                    <input type="radio" name="travel-style" value="budget" checked>
+                                    <div class="option-content">
+                                        <h4>Budget Explorer</h4>
+                                        <p>Hostels, local food, public transport</p>
+                                    </div>
+                                </label>
+                                <label class="style-option">
+                                    <input type="radio" name="travel-style" value="comfort">
+                                    <div class="option-content">
+                                        <h4>Comfortable Journey</h4>
+                                        <p>Mid-range hotels, good restaurants</p>
+                                    </div>
+                                </label>
+                                <label class="style-option">
+                                    <input type="radio" name="travel-style" value="luxury">
+                                    <div class="option-content">
+                                        <h4>Luxury Experience</h4>
+                                        <p>5-star hotels, fine dining, premium</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn--primary btn--full-width" onclick="calculateGPSTripCost()">
+                        🧮 Calculate GPS Route & Costs
+                    </button>
+                </div>
+                
+                <div class="trip-results" id="trip-results" style="display: none;">
+                    <h3>📊 Your Trip Analysis</h3>
+                    
+                    <!-- Route Map -->
+                    <div class="route-map-container">
+                        <div class="map" id="route-map" style="position: relative; height: 300px;"></div>
+                    </div>
+                    
+                    <!-- Route Details -->
+                    <div class="route-details" id="route-details">
+                        <!-- Route information will be populated here -->
+                    </div>
+                    
+                    <!-- Cost Breakdown -->
+                    <div class="cost-breakdown" id="cost-breakdown">
+                        <!-- Cost breakdown will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- My Bookings Section -->
+    <section id="my-bookings" class="section hidden">
+        <div class="container">
+            <h2 class="section-title">📋 My Bookings</h2>
+            <div id="bookings-container">
+                <!-- Bookings will be populated here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Booking Modal -->
+    <div class="modal hidden" id="booking-modal">
+        <div class="modal-backdrop" onclick="closeBookingModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="booking-modal-title">🏨 Book Hotel</h3>
+                <button class="modal-close" onclick="closeBookingModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="booking-form">
+                    <div class="form-group">
+                        <label class="form-label" for="booking-name">Full Name *</label>
+                        <input type="text" id="booking-name" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="booking-phone">Phone Number *</label>
+                        <input type="tel" id="booking-phone" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="booking-email">Email Address *</label>
+                        <input type="email" id="booking-email" class="form-control" required>
+                    </div>
+                    
+                    <!-- Hotel specific fields -->
+                    <div id="hotel-booking-fields">
+                        <div class="form-group">
+                            <label class="form-label" for="check-in-date">Check-in Date *</label>
+                            <input type="date" id="check-in-date" class="form-control" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="check-out-date">Check-out Date *</label>
+                            <input type="date" id="check-out-date" class="form-control" required>
+                        </div>
+                    </div>
+                    
+                    <!-- Restaurant specific fields -->
+                    <div id="restaurant-booking-fields" class="hidden">
+                        <div class="form-group">
+                            <label class="form-label" for="reservation-date">Reservation Date *</label>
+                            <input type="date" id="reservation-date" class="form-control" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="reservation-time">Reservation Time *</label>
+                            <select id="reservation-time" class="form-control" required>
+                                <option value="">Select Time</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="num-guests">Number of Guests *</label>
+                        <input type="number" id="num-guests" class="form-control" min="1" max="10" value="2" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="special-requests">Special Requests</label>
+                        <textarea id="special-requests" class="form-control" rows="3" placeholder="Any special requirements or requests..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn--secondary" onclick="closeBookingModal()">Cancel</button>
+                <button type="submit" class="btn btn--primary" onclick="submitBooking()">Confirm Booking</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Booking Confirmation Modal -->
+    <div class="modal hidden" id="confirmation-modal">
+        <div class="modal-backdrop" onclick="closeConfirmationModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>✅ Booking Confirmed!</h3>
+                <button class="modal-close" onclick="closeConfirmationModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="confirmation-content" id="confirmation-content">
+                    <!-- Confirmation details will be populated here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn--secondary" onclick="closeConfirmationModal()">Close</button>
+                <button type="button" class="btn btn--primary" id="navigate-to-venue-btn">🧭 Navigate to Venue</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Location Permission Modal -->
+    <div class="modal hidden" id="location-modal">
+        <div class="modal-backdrop" onclick="closeModal('location-modal')"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🛰️ Enable High-Precision GPS</h3>
+                <button class="modal-close" onclick="closeModal('location-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="gps-features">
+                    <h4>Advanced GPS Features:</h4>
+                    <ul>
+                        <li>📍 High-accuracy positioning (±1-3m accuracy)</li>
+                        <li>🔄 Real-time location updates every 30 seconds</li>
+                        <li>🧭 Compass heading and elevation data</li>
+                        <li>📏 Precise distance calculations</li>
+                        <li>🗺️ Interactive route planning</li>
+                        <li>🎯 Location-based recommendations</li>
+                    </ul>
+                    <div class="privacy-notice">
+                        <p><strong>Privacy:</strong> Your location data is processed locally and never stored on our servers. You can disable GPS tracking at any time.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn--secondary" onclick="closeModal('location-modal')">Not Now</button>
+                <button class="btn btn--primary" onclick="enableHighAccuracyGPS()">🛰️ Enable Precision GPS</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GPS Route Sharing Modal -->
+    <div class="modal hidden" id="share-route-modal">
+        <div class="modal-backdrop" onclick="closeModal('share-route-modal')"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🔗 Share GPS Route</h3>
+                <button class="modal-close" onclick="closeModal('share-route-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="share-options">
+                    <div class="share-option">
+                        <h4>📱 Navigate with:</h4>
+                        <div class="navigation-apps">
+                            <button class="nav-app-btn" onclick="openInMaps('google')">Google Maps</button>
+                            <button class="nav-app-btn" onclick="openInMaps('apple')">Apple Maps</button>
+                            <button class="nav-app-btn" onclick="openInMaps('waze')">Waze</button>
+                        </div>
+                    </div>
+                    <div class="share-option">
+                        <h4>📋 Share Coordinates:</h4>
+                        <textarea id="share-coordinates" class="form-control" readonly></textarea>
+                        <button class="btn btn--secondary" onclick="copyCoordinates()">📋 Copy</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Toast -->
+    <div class="toast hidden" id="success-toast">
+        <div class="toast-content">
+            <span class="toast-icon">✅</span>
+            <span class="toast-message">Booking confirmed successfully!</span>
+            <button class="toast-close" onclick="hideToast()">&times;</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>🇮🇳 Incredible India Travel</h3>
+                    <p>Your GPS-powered gateway to exploring India with enterprise-level precision and comprehensive mapping features.</p>
+                    <div class="gps-stats">
+                        <small>GPS Accuracy: ±1-3m | Real-time Updates | 50K+ Mapped Locations</small>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>🛰️ GPS Features</h4>
+                    <a href="#hotels">GPS Hotel Finder</a>
+                    <a href="#restaurants">GPS Restaurant Locator</a>
+                    <a href="#trip-calculator">GPS Route Planner</a>
+                </div>
+                <div class="footer-section">
+                    <h4>🗺️ Coverage Areas</h4>
+                    <p>Mumbai • Delhi • Bangalore • Chennai • Jaipur • Goa • Kolkata • Hyderabad • Agra • Udaipur</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Incredible India Travel. Powered by advanced GPS technology for precise travel experiences.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
